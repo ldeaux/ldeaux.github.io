@@ -62,10 +62,10 @@
     <body>
         <img src='logo.png' class='logo'/>
         <div class='box'>
-          <p>访问IP: <?php echo $_SERVER['REMOTE_ADDR']; ?></p>
-          <p>当前日期: <?php echo date('Y-m-d'); ?></p>
+          <p id='ip'>访问IP: </p>
+          <p id='time'>当前日期: </p>
           <p>我们的QQ群: 243561399</p>
-          <p>您的浏览器: <?php echo get_broswer(); ?></p>
+          <p id='browser'>您的浏览器: </p>
         </div>
         <br>
         <center>
@@ -93,50 +93,74 @@
     logo.style.height='50vh'
     logo.style.marginLeft='30px'
   } 
-</script>
-    
-<?php
+  
+  //另一种:
+//实现函数如下所示
+function getBrowser(n) {
+  var ua = navigator.userAgent.toLowerCase(),
+      s,
+      name = '',
+      ver = 0;
+  //探测浏览器
+  (s = ua.match(/msie ([\d.]+)/)) ? _set("ie", _toFixedVersion(s[1])):
+  (s = ua.match(/firefox\/([\d.]+)/)) ? _set("firefox", _toFixedVersion(s[1])) :
+  (s = ua.match(/chrome\/([\d.]+)/)) ? _set("chrome", _toFixedVersion(s[1])) :
+  (s = ua.match(/opera.([\d.]+)/)) ? _set("opera", _toFixedVersion(s[1])) :
+  (s = ua.match(/version\/([\d.]+).*safari/)) ? _set("safari", _toFixedVersion(s[1])) : 0;
 
-function get_broswer()
+  function _toFixedVersion(ver, floatLength) {
+    ver = ('' + ver).replace(/_/g, '.');
+    floatLength = floatLength || 1;
+    ver = String(ver).split('.');
+    ver = ver[0] + '.' + (ver[1] || '0');
+    ver = Number(ver).toFixed(floatLength);
+    return ver;
+  }
+  function _set(bname, bver) {
+    name = bname;
+    ver = bver;
+  }
+  return (n == 'n' ? name : (n == 'v' ? ver : name + ver));
+};
+
+var date = new Date(); // 获取当前月份 
+var nowMonth = date.getMonth() + 1; // 获取当前是几号 
+var strDate = date.getDate(); // 添加分隔符“-” 
+var seperator = "-"; // 对月份进行处理，1-9月在前面添加一个“0” 
+if (nowMonth >= 1 && nowMonth <= 9) { 
+    nowMonth = "0" + nowMonth; 
+} // 对月份进行处理，1-9号在前面添加一个“0” 
+if (strDate >= 0 && strDate <= 9) { 
+    strDate = "0" + strDate; 
+} // 最后拼接字符串，得到一个格式为(yyyy-MM-dd)的日期 
+var nowDate = date.getFullYear() + seperator + nowMonth + seperator + strDate;
+
+function loadXMLDoc()
 {
-    $sys = $_SERVER['HTTP_USER_AGENT'];  //获取用户代理字符串  
-    if (stripos($sys, "Firefox/") > 0) {  
-        preg_match("/Firefox\/([^;)]+)+/i", $sys, $b);  
-        $exp[0] = "Firefox";  
-        $exp[1] = $b[1];  	//获取火狐浏览器的版本号  
-    } elseif (stripos($sys, "Maxthon") > 0) {  
-        preg_match("/Maxthon\/([\d\.]+)/", $sys, $aoyou);  
-        $exp[0] = "傲游";  
-        $exp[1] = $aoyou[1];  
-    } elseif (stripos($sys, "MSIE") > 0) {  
-        preg_match("/MSIE\s+([^;)]+)+/i", $sys, $ie);  
-        $exp[0] = "IE";  
-        $exp[1] = $ie[1];  //获取IE的版本号  
-    } elseif (stripos($sys, "OPR") > 0) {  
-        preg_match("/OPR\/([\d\.]+)/", $sys, $opera);  
-        $exp[0] = "Opera";  
-        $exp[1] = $opera[1];    
-    } elseif(stripos($sys, "Edge") > 0) {  
-        //win10 Edge浏览器 添加了chrome内核标记 在判断Chrome之前匹配  
-        preg_match("/Edge\/([\d\.]+)/", $sys, $Edge);  
-        $exp[0] = "Edge";  
-        $exp[1] = $Edge[1];  
-    } elseif (stripos($sys, "Chrome") > 0) {  
-        preg_match("/Chrome\/([\d\.]+)/", $sys, $google);  
-        $exp[0] = "Chrome";  
-        $exp[1] = $google[1];  //获取google chrome的版本号  
-    } elseif(stripos($sys,'rv:')>0 && stripos($sys,'Gecko')>0){  
-        preg_match("/rv:([\d\.]+)/", $sys, $IE);  
-        $exp[0] = "IE";  
-        $exp[1] = $IE[1];  
-    }else {  
-        $exp[0] = "未知浏览器";  
-        $exp[1] = "";   
-    }  
-    return $exp[0].'('.$exp[1].')';  
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	{
+		//  IE7+, Firefox, Chrome, Opera, Safari 浏览器执行代码
+		xmlhttp=new XMLHttpRequest();
+	}
+	else
+	{
+		// IE6, IE5 浏览器执行代码
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			ip.innerHTML='访问IP: '+xmlhttp.responseText;
+		}
+	}
+	xmlhttp.open("GET","https://api.ipify.org/",true);
+	xmlhttp.send();
 }
 
-
-?>
-
+loadXMLDoc()
+time.innerHTML='当前日期 :'+nowDate
+browser.innerHTML='您的浏览器: '+getBrowser()
+</script>
 </html>
